@@ -1,0 +1,326 @@
+{
+  "name": "Threadly — Order Events",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "threadly-order",
+        "responseMode": "onReceived",
+        "responseData": "immediately",
+        "options": {}
+      },
+      "id": "webhook-threadly-order",
+      "name": "Threadly Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-created",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "order.created",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-order-created",
+      "name": "Event is created?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 250]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-updated",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "order.updated",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-order-updated",
+      "name": "Event is updated?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 520]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-cancelled",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "order.cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-order-cancelled",
+      "name": "Event is cancelled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 790]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-summary-created",
+              "name": "summary",
+              "value": "=🛒 New order {{ $json.order.orderNumber }} — {{ $json.order.customer ? $json.order.customer.name : 'unknown' }} — ${{ $json.order.total }} ({{ $json.order.items ? $json.order.items.length : 0 }} item(s))",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-summary-created",
+      "name": "Summary: created",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [460, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-summary-updated",
+              "name": "summary",
+              "value": "=🔄 Order {{ $json.order.orderNumber }} status → {{ $json.order.status }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-summary-updated",
+      "name": "Summary: updated",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-summary-cancelled",
+              "name": "summary",
+              "value": "=❌ Order {{ $json.order.orderNumber }} cancelled",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-summary-cancelled",
+      "name": "Summary: cancelled",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.summary }}",
+        "additionalFields": {},
+        "options": {}
+      },
+      "id": "telegram-notify",
+      "name": "Notify on Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [720, 400]
+    },
+    {
+      "parameters": {
+        "authType": "accessToken",
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "me/messages",
+        "edge": "",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "recipient",
+                "value": "={\"id\":\"{{ $env.FB_PSID }}\"}"
+              },
+              {
+                "name": "message",
+                "value": "={\"text\":\"{{ $json.summary }}\"}"
+              },
+              {
+                "name": "messaging_type",
+                "value": "MESSAGE_TAG"
+              },
+              {
+                "name": "tag",
+                "value": "CONFIRMED_EVENT_UPDATE"
+              }
+            ]
+          }
+        }
+      },
+      "id": "messenger-notify",
+      "name": "Notify on Messenger",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [940, 400]
+    }
+  ],
+  "connections": {
+    "Threadly Webhook": {
+      "main": [
+        [
+          {
+            "node": "Event is created?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event is created?": {
+      "main": [
+        [
+          {
+            "node": "Summary: created",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event is updated?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event is updated?": {
+      "main": [
+        [
+          {
+            "node": "Summary: updated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event is cancelled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event is cancelled?": {
+      "main": [
+        [
+          {
+            "node": "Summary: cancelled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary: created": {
+      "main": [
+        [
+          {
+            "node": "Notify on Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify on Messenger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary: updated": {
+      "main": [
+        [
+          {
+            "node": "Notify on Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify on Messenger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary: cancelled": {
+      "main": [
+        [
+          {
+            "node": "Notify on Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify on Messenger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

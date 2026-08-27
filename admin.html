@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Admin — Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ============ Login ============ -->
+  <div id="loginView" class="admin-login">
+    <form class="login-card" id="loginForm">
+      <p class="login-logo" id="loginLogo">Store<span>.</span></p>
+      <h1>Admin panel</h1>
+      <p class="login-hint">Enter the admin password to manage products, categories and site content.</p>
+      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+      <p class="login-error" id="loginError" hidden></p>
+      <button type="submit" class="btn-primary btn-block">Sign in</button>
+      <a class="login-back" href="index.html">← Back to store</a>
+    </form>
+  </div>
+
+  <!-- ============ Dashboard ============ -->
+  <div id="dashboardView" hidden>
+    <header class="admin-header">
+      <div class="container admin-header-inner">
+        <strong class="admin-title">Admin panel</strong>
+        <nav class="admin-tabs" aria-label="Admin sections">
+          <button class="tab active" data-tab="products" aria-pressed="true">Products</button>
+          <button class="tab" data-tab="categories" aria-pressed="false">Categories</button>
+          <button class="tab" data-tab="orders" aria-pressed="false">Orders</button>
+          <button class="tab" data-tab="webhooks" aria-pressed="false">Webhooks</button>
+          <button class="tab" data-tab="settings" aria-pressed="false">Settings</button>
+        </nav>
+        <div class="admin-actions">
+          <a class="btn-ghost" href="index.html" target="_blank" rel="noopener">View store ↗</a>
+          <button class="btn-ghost" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="tab-products" class="tab-panel">
+        <div class="tab-head">
+          <h2>Products</h2>
+          <button class="btn-primary" id="addProductBtn">+ Add product</button>
+        </div>
+        <div id="productList" class="admin-list"></div>
+      </section>
+
+      <section id="tab-categories" class="tab-panel" hidden>
+        <div class="tab-head">
+          <h2>Categories</h2>
+          <button class="btn-primary" id="addCategoryBtn">+ Add category</button>
+        </div>
+        <p class="row-sub" style="margin-bottom:14px">
+          Categories become the storefront filter tabs and collection cards. Products can belong to several categories.
+        </p>
+        <div id="categoryList" class="admin-list"></div>
+      </section>
+
+      <section id="tab-orders" class="tab-panel" hidden>
+        <div class="tab-head">
+          <h2>Orders</h2>
+          <button class="btn-ghost" id="refreshOrdersBtn">↻ Refresh</button>
+        </div>
+        <p class="row-sub" style="margin-bottom:14px">
+          Orders placed on the storefront — customer details, items, payment method (QR / cash on delivery) and status.
+        </p>
+        <div id="orderList" class="admin-list"></div>
+      </section>
+
+      <section id="tab-webhooks" class="tab-panel" hidden>
+        <div class="tab-head">
+          <h2>Webhook events</h2>
+          <button class="btn-ghost" id="refreshWebhooksBtn">↻ Refresh</button>
+        </div>
+        <p class="row-sub" style="margin-bottom:14px">
+          Events received by the store's webhook receiver (<code>POST /api/webhooks/orders</code>).
+          Point the Order webhook URL at this endpoint (e.g. <code>https://sensuelle.mero.eu.org/api/webhooks/orders</code>)
+          to record every order event here.
+        </p>
+        <div id="webhookList" class="admin-list"></div>
+      </section>
+
+      <section id="tab-settings" class="tab-panel" hidden>
+        <div class="tab-head">
+          <h2>Site settings</h2>
+        </div>
+        <form id="settingsForm" class="settings-form">
+          <label>Store name <input type="text" name="storeName" required></label>
+          <label>Announcement bar <input type="text" name="announcement" placeholder="Leave empty to hide"></label>
+          <label>Hero eyebrow <input type="text" name="heroEyebrow"></label>
+          <label>Hero headline <input type="text" name="heroHeadline"></label>
+          <label>Hero subtitle <textarea name="heroSub" rows="3"></textarea></label>
+          <label>About heading <input type="text" name="aboutHeading"></label>
+          <label>About text <textarea name="aboutText" rows="3"></textarea></label>
+          <label>Footer note <input type="text" name="footerNote"></label>
+          <label>Order webhook URL
+            <input type="url" name="webhookUrl" placeholder="https://sensuelle.mero.eu.org/api/webhooks/orders">
+            <small>Optional — the server POSTs JSON events to this URL when an order is created, updated, or cancelled.
+            Point it at this store's own receiver (<code>…/api/webhooks/orders</code>) to record events in the Webhooks tab, or at any other endpoint (Slack, Zapier, your backend).</small>
+          </label>
+          <label>Webhook secret
+            <input type="password" name="webhookSecret" autocomplete="new-password" placeholder="Leave empty to disable">
+            <small>Optional shared secret — the webhook is sent with an <code>X-Webhook-Secret</code> header, and the receiver rejects events that don't present the matching secret. Leave empty for no authentication.</small>
+          </label>
+          <label>Admin password
+            <input type="password" name="adminPassword" autocomplete="new-password">
+            <small>Used to log into this panel. Change it to something only you know.</small>
+          </label>
+          <div class="editor-actions">
+            <button type="submit" class="btn-primary">Save settings</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ Product editor modal ============ -->
+  <div class="modal" id="productModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product editor">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel modal-panel--form">
+      <button class="modal-close" data-close aria-label="Close product editor">✕</button>
+      <form id="productForm" class="editor-form">
+        <h2 id="productFormTitle">Add product</h2>
+
+        <label>Name <input type="text" name="name" required></label>
+
+        <div class="form-grid2">
+          <label>Price ($) <input type="number" name="price" min="0" step="0.01" required></label>
+          <label>Old price ($) <input type="number" name="oldPrice" min="0" step="0.01" placeholder="Optional — shows sale price"></label>
+        </div>
+
+        <label>Description <textarea name="description" rows="3"></textarea></label>
+
+        <div class="form-grid2">
+          <label>3D style <select name="style"></select></label>
+          <label>Default colour <input type="color" name="color" value="#94a3b8"></label>
+        </div>
+
+        <label>Image URL <input type="url" name="image" placeholder="Optional — leave empty for generated garment art"></label>
+
+        <fieldset class="editor-colors">
+          <legend>Available colours (shown as swatches)</legend>
+          <div id="extraColors"></div>
+          <button type="button" class="btn-ghost" id="addColorBtn">+ Add colour</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>Categories</legend>
+          <div id="categoryChecks" class="checks"></div>
+        </fieldset>
+
+        <div class="editor-preview">
+          <img id="formPreview" alt="Garment preview">
+        </div>
+
+        <div class="editor-actions">
+          <button type="button" class="btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn-primary">Save product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ Category editor modal ============ -->
+  <div class="modal" id="categoryModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Category editor">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel modal-panel--form modal-panel--small">
+      <button class="modal-close" data-close aria-label="Close category editor">✕</button>
+      <form id="categoryForm" class="editor-form">
+        <h2 id="categoryFormTitle">Add category</h2>
+        <label>Label <input type="text" name="label" required></label>
+        <label>Colour <input type="color" name="color" value="#64748b"></label>
+        <div class="editor-actions">
+          <button type="button" class="btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn-primary">Save category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- Plain (non-module) script: shows a visible message on the login card
+       whenever a script fails, so a broken page is never silent. -->
+  <script>
+    (function () {
+      var scriptFailed = false;
+      function show(msg) {
+        var box = document.getElementById('loginError');
+        if (box && box.hidden) { box.textContent = msg; box.hidden = false; }
+      }
+      window.addEventListener('error', function (e) {
+        if (e.target && e.target.tagName === 'SCRIPT') {
+          scriptFailed = true;
+          show('A script failed to load (' + (e.target.getAttribute('src') || 'inline') + '). ' +
+            'Press Ctrl+Shift+R to reload. If it persists, open the browser console (F12) and check for errors.');
+        } else {
+          show('Script error: ' + (e.message || 'unknown') + (e.filename ? ' at ' + e.filename.split('/').pop() : ''));
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (e) {
+        show('Script error: ' + ((e.reason && e.reason.message) ? e.reason.message : String(e.reason)));
+      });
+      window.addEventListener('load', function () {
+        // The admin module always replaces the login logo with the store name;
+        // if it still says "Store." the scripts never started.
+        if (!scriptFailed && document.getElementById('loginLogo') &&
+            document.getElementById('loginLogo').textContent.trim() === 'Store.') {
+          show('The page scripts did not start. Press Ctrl+Shift+R (hard refresh). ' +
+            'If it persists, open the browser console (F12) — an extension or browser setting may be blocking scripts.');
+        }
+      });
+    })();
+  </script>
+
+  <script type="module" src="js/admin.js?v=6"></script>
+</body>
+</html>

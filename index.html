@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A clothing store with 360° product views. Shop new arrivals, re-stocked favourites and popular pieces.">
+  <title>Clothing Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👕</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="announcement" id="announcement" hidden></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="logo" id="logo" aria-label="Store home">Store<span>.</span></a>
+      <nav class="main-nav" aria-label="Main">
+        <a href="#shop">Shop</a>
+        <a href="#collections">Collections</a>
+        <a href="#about">About</a>
+      </nav>
+      <button class="cart-btn" id="accountBtn" aria-label="Account">
+        <span class="cart-icon" aria-hidden="true">👤</span>
+        <span id="accountLabel">Sign in</span>
+      </button>
+      <button class="cart-btn" id="cartBtn" aria-label="Shopping cart">
+        <span class="cart-icon" aria-hidden="true">🛍</span>
+        <span id="cartCount">Cart (0)</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-badge" aria-hidden="true">
+      <span class="hero-badge-ring">360°</span>
+      <span class="hero-badge-label">spin every piece</span>
+    </div>
+    <div class="container hero-inner">
+      <p class="hero-eyebrow" id="heroEyebrow"></p>
+      <h1 id="heroHeadline"></h1>
+      <p class="hero-sub" id="heroSub"></p>
+      <a href="#shop" class="btn-primary">Shop the collection</a>
+    </div>
+  </section>
+
+  <main id="shop" class="container shop">
+    <div class="shop-head">
+      <h2>Shop</h2>
+      <div class="filters" id="filterBar" role="group" aria-label="Filter products by category"></div>
+    </div>
+    <p class="result-count" id="resultCount" aria-live="polite"></p>
+    <div class="store-error" id="storeError" hidden>
+      Couldn't load the store. Make sure the server is running (<code>npm start</code>) and refresh the page.
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </main>
+
+  <section id="collections" class="container collections">
+    <h2>Collections</h2>
+    <div class="collection-cards" id="collectionCards"></div>
+  </section>
+
+  <section id="about" class="container about">
+    <h2 id="aboutHeading"></h2>
+    <p id="aboutText"></p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="logo footer-logo" id="footerLogo">Store<span>.</span></p>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="#shop">Shop</a>
+        <a href="#collections">Collections</a>
+        <a href="#about">About</a>
+      </nav>
+      <p class="footer-note" id="footerNote"></p>
+    </div>
+  </footer>
+
+  <!-- Cart drawer -->
+  <div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Shopping cart">
+    <div class="cart-backdrop" data-close-cart></div>
+    <div class="cart-panel">
+      <div class="cart-head">
+        <h3>Your cart</h3>
+        <button class="cart-close" data-close-cart aria-label="Close cart">✕</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-foot">
+        <p class="cart-total">Total: <span id="cartTotal">$0.00</span></p>
+        <button class="btn-primary cart-checkout" id="checkoutBtn">Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account modal (sign in / register / my orders) -->
+  <div class="modal" id="accountModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Your account">
+    <div class="modal-backdrop" data-close-account></div>
+    <div class="modal-panel modal-panel--account">
+      <button class="modal-close" data-close-account aria-label="Close account">✕</button>
+      <div class="account-body" id="accountBody"></div>
+    </div>
+  </div>
+
+  <!-- 360° product viewer modal -->
+  <div class="modal" id="viewerModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="360° product viewer">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel">
+      <button class="modal-close" data-close aria-label="Close 360° viewer">✕</button>
+      <div class="viewer-stage" id="viewerStage"></div>
+      <div class="product-detail" id="productDetail"></div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="js/app.js?v=5"></script>
+</body>
+</html>
